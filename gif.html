@@ -250,7 +250,7 @@
         };
         function parseImg() {                           // decodes image data to create the indexed pixel image
             var deinterlace, frame, bitField;
-            deinterlace = function (width) {                   // de interlace pixel data if needed
+            deinterlace = function (width) {                   // de interlace pixel data if needed // 反交错像素数据
                 var lines, fromLine, pass, toline;
                 lines = pixelBufSize / width;
                 fromLine = 0;
@@ -265,27 +265,55 @@
                     }
                 }
             };
-            frame                = {}
-            gif.frames.push(frame);
-            frame.disposalMethod = gif.disposalMethod;
+            frame                = {}                                                   // 初始化 frame
+            gif.frames.push(frame);                                                     // 将frame 推入frames
+            frame.disposalMethod = gif.disposalMethod;                                  // 复制gif属性到frame
             frame.time           = gif.length;
             frame.delay          = gif.delayTime * 10;
             gif.length          += frame.delay;
             if (gif.transparencyGiven) { frame.transparencyIndex = gif.transparencyIndex }
             else { frame.transparencyIndex = undefined }
-            frame.leftPos = (st.data[st.pos++]) + ((st.data[st.pos++]) << 8);
+//       7 6 5 4 3 2 1 0        Field Name                    Type
+//      +---------------+
+//   0  |               |       Image Separator               Byte
+//      +---------------+
+//   1  |               |       Image Left Position           Unsigned
+//      +-             -+
+//   2  |               |
+//      +---------------+
+//   3  |               |       Image Top Position            Unsigned
+//      +-             -+
+//   4  |               |
+//      +---------------+
+//   5  |               |       Image Width                   Unsigned
+//      +-             -+
+//   6  |               |
+//      +---------------+
+//   7  |               |       Image Height                  Unsigned
+//      +-             -+
+//   8  |               |
+//      +---------------+
+//   9  | | | |   |     |       <Packed Fields>               See below
+//      +---------------+
+
+//      <Packed Fields>  =      Local Color Table Flag        1 Bit
+//                              Interlace Flag                1 Bit
+//                              Sort Flag                     1 Bit
+//                              Reserved                      2 Bits
+//                              Size of Local Color Table     3 Bits
+            frame.leftPos = (st.data[st.pos++]) + ((st.data[st.pos++]) << 8);           // 获取坐标
             frame.topPos  = (st.data[st.pos++]) + ((st.data[st.pos++]) << 8);
             frame.width   = (st.data[st.pos++]) + ((st.data[st.pos++]) << 8);
             frame.height  = (st.data[st.pos++]) + ((st.data[st.pos++]) << 8);
-            bitField      = st.data[st.pos++];
-            frame.localColourTableFlag = bitField & 0b10000000 ? true : false; 
+            bitField      = st.data[st.pos++];                                          // 获取数据字段
+            frame.localColourTableFlag = bitField & 0b10000000 ? true : false;          // 判断gif 是否使用local Colour Table 见Ref.txt
             if (frame.localColourTableFlag) { frame.localColourTable = parseColourTable(1 << ((bitField & 0b111) + 1)) }
             if (pixelBufSize !== frame.width * frame.height) { // create a pixel buffer if not yet created or if current frame size is different from previous
                 pixelBuf     = new Uint8Array(frame.width * frame.height);
                 pixelBufSize = frame.width * frame.height;
             }
-            lzwDecode(st.data[st.pos++], st.readSubBlocksB()); // decode the pixels
-            if (bitField & 0b1000000) {                        // de interlace if needed
+            lzwDecode(st.data[st.pos++], st.readSubBlocksB()); // decode the pixels     // 解码像素
+            if (bitField & 0b1000000) {                        // de interlace if needed// 判断是否需要反交错
                 frame.interlaced = true;
                 deinterlace(frame.width);
             } else { frame.interlaced = false }
@@ -368,7 +396,7 @@
         function parseBlock() { // parsing the blocks
             if (gif.cancel !== undefined && gif.cancel === true) { canceled(); return }
     
-            const blockId = st.data[st.pos++];
+            const blockId = st.data[st.pos++];                                      // 获取block id
             if(blockId === GIF_FILE.IMAGE ){ // image block                         // 如果是image标识, 开始parseImg
                 parseImg();
                 if (gif.firstFrameOnly) { finnished(); return }
