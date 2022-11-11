@@ -223,11 +223,11 @@
             gif.width             = (st.data[st.pos++]) + ((st.data[st.pos++]) << 8);   // 第六位16转10 + 第七位16转10 位运算右移8位
             gif.height            = (st.data[st.pos++]) + ((st.data[st.pos++]) << 8);   // 第八位16转10 + 第九位16转10 位运算右移8位
             bitField              = st.data[st.pos++];                                  // 第十位，数据字段，1bit = 8 byte m,i,s,r,0,pixel
-            gif.colorRes          = (bitField & 0b1110000) >> 4;                        // 取01110000 的数 
-            gif.globalColourCount = 1 << ((bitField & 0b111) + 1);                      // 取00000111 的数 + 1 颜色列表的位数
-            gif.bgColourIndex     = st.data[st.pos++];                                  // 第十一位
+            gif.colorRes          = (bitField & 0b1110000) >> 4;                        // cr 取01110000 的数 
+            gif.globalColourCount = 1 << ((bitField & 0b111) + 1);                      // pixel 取00000111 的数 + 1 全局颜色列表的大小
+            gif.bgColourIndex     = st.data[st.pos++];                                  // 第十一位，背景色
             st.pos++;                    // ignoring pixel aspect ratio. if not 0, aspectRatio = (pixelAspectRatio + 15) / 64
-            if (bitField & 0b10000000) { gif.globalColourTable = parseColourTable(gif.globalColourCount) } // global colour flag
+            if (bitField & 0b10000000) { gif.globalColourTable = parseColourTable(gif.globalColourCount) } // global colour flag // m位为1才解析colourtable
             setTimeout(parseBlock, 0);                                                  // 将事件插入“运行队列”队尾, 转异步
         }
         function parseAppExt() { // get application specific data. Netscape added iterations and terminator. Ignoring that
@@ -340,10 +340,10 @@
                 pixel = pDat[i];
                 col   = ct[pixel];
                 if (ti !== pixel) {
-                    dat[ind++] = col[0];
-                    dat[ind++] = col[1];
-                    dat[ind++] = col[2];
-                    dat[ind++] = 255;      // Opaque.
+                    dat[ind++] = col[0];                    // R
+                    dat[ind++] = col[1];                    // G
+                    dat[ind++] = col[2];                    // B
+                    dat[ind++] = 255;      // Opaque.       // 不透明度
                 } else
                     if (useT) {
                         dat[ind + 3] = 0; // Transparent.
