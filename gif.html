@@ -21,7 +21,8 @@
 
     var myGif;
     // Can not load gif cross domain unless it has CORS header
-    const gifURL = "https://upload.wikimedia.org/wikipedia/commons/a/a2/Wax_fire.gif";
+    const gifURL = "Wax_fire.gif";
+    // const gifURL = "https://upload.wikimedia.org/wikipedia/commons/a/a2/Wax_fire.gif";
     // timeout just waits till script has been parsed and executed
     // then starts loading a gif
     setTimeout(()=>{
@@ -38,11 +39,6 @@
         ctx.rotate(rot);
         ctx.drawImage(image,-image.width / 2, -image.height / 2);
     }
-    // helper functions
-    const rand  = (min = 1, max = min + (min = 0)) => Math.random() * (max - min) + min;
-    const setOf     =(c,C)=>{var a=[],i=0;while(i<c){a.push(C(i++))}return a};
-    const eachOf    =(a,C)=>{var i=0;const l=a.length;while(i<l && C(a[i],i++,l)!==true);return i};
-    const mod = (v,m) => ((v % m) + m) % m;
     
     
     var w = canvas.width;
