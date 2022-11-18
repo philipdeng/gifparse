@@ -26,12 +26,12 @@
 
 "use strict";
 
-function GifWriter(buf, width, height, gopts) {
+function GifWriter(buf, width, height, myGif) {
   var p = 0;
 
-  var gopts = gopts === undefined ? {} : gopts;
-  var loop_count = gopts.loop === undefined ? null : gopts.loop;
-  var global_palette = gopts.palette === undefined ? null : gopts.palette;
+  var myGif = myGif === undefined ? {} : myGif;
+  var loop_count = myGif.loop === undefined ? null : myGif.loop;
+  var global_palette = myGif.palette === undefined ? null : myGif.palette;            // color table
 
   if (width <= 0 || height <= 0 || width > 65535 || height > 65535)
     throw new Error("Width/Height invalid.");
@@ -57,8 +57,8 @@ function GifWriter(buf, width, height, gopts) {
     while (gp_num_colors >>= 1) ++gp_num_colors_pow2;
     gp_num_colors = 1 << gp_num_colors_pow2;
     --gp_num_colors_pow2;
-    if (gopts.background !== undefined) {
-      background = gopts.background;
+    if (myGif.background !== undefined) {
+      background = myGif.background;
       if (background >= gp_num_colors)
         throw new Error("Background index out of range.");
       // The GIF spec states that a background index of 0 should be ignored, so

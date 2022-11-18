@@ -3,13 +3,14 @@
 import numpy as np
 
 # global vars
-GCExt   = 0xF9
+GCExt = 0xF9
 COMMENT = 0xFE
-APPExt  = 0xFF
+APPExt = 0xFF
 UNKNOWN = 0x01
-IMAGE   = 0x2C
-EOF     = 59
-EXT     = 0x21
+IMAGE = 0x2C
+EOF = 59
+EXT = 0x21
+
 
 class Stream():
 
@@ -20,20 +21,21 @@ class Stream():
         self.gif = dict()
         pass
 
-def loadData(path):
+class Frame():
+    pass
 
+def loadData(path):
     with open(path, "rb") as f:
         data = f.read()
         return data
+
 
 def dataLoaded(data):
     st = Stream(data)
     return st
 
 
-
 def parse(st):
-    
     def parseColourTable(count):
         colours = []
         i = 0
@@ -42,7 +44,7 @@ def parse(st):
             st.pos += 3
             i += 1
         return colours
-    
+
     # parse 
     st.pos += 6
     st.gif['width'] = st.data[st.pos]
@@ -65,10 +67,11 @@ def parse(st):
     # parseBlock
     pass
 
+
 def entry():
-    
     data = loadData('Wax_fire.gif')
     st = dataLoaded(data)
     res = parse(st)
+
 
 entry()
